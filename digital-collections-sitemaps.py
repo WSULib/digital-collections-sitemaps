@@ -60,6 +60,13 @@ else:
 
 
 def getSingleObjects():
+	doc_dict = {}
 	si = sunburnt.SolrInterface("http://localhost:8080/solr4/fedobjs/")	
 	# with 50,000, there is an error. It's proably in one record, but how do we do this with exceptions?
 	response = si.query(id="wayne*").paginate(start=0,rows=50000).execute()
+	for each in response:
+		do stuff, push to doc_dict
+
+
+def writeSitemapXML(doc_dict):
+	pass
