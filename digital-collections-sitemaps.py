@@ -4,69 +4,59 @@
 import requests
 import lxml
 import sunburnt
+from apesmit import Sitemap #library for writing sitemap XML
+import time
+import sys
 
+'''Currently writing only <50,000 objects.  Will need to read response.result.numFound and write new files if need be.'''
 
-# example sunburnt code
-'''	
-si = sunburnt.SolrInterface("http://localhost:8080/solr4/users/")	
-response = si.query(user_username=username).execute()
-recordedHash = response[0]['user_hash'][0]
-print "Provided:",providedHash
-print "Recorded:",recordedHash
-if providedHash == recordedHash:
-	print "Credentials look good, proceeding."
-	# delete doc
-	PID = getParams['PID'][0]
-	si.delete(username+"_"+PID)
-	si.commit()
-
-	# return response
-	returnDict['username'] = username
-	returnDict['favorite_removed'] = PID
-	return json.dumps(returnDict)
-
-else:
-	print "Credentials don't match."
-	returnDict['status'] = "Credentials don't match."
-	return json.dumps(returnDict)
-'''
-
-# desired output
-'''
-** Sitemap **
-
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" 
-	<url> 
-		<loc>http://digital.library.wayne.edu/digitalcollections/item?id=wayne:CFAIEB02b001</loc> 
-		<lastmod>YYYY-MM-DDThh:mmTZD</lastmod>
-	</url>
-</urlset>
-
-** Index of Sitemaps **
-
+'''Sitemap index:
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-	<sitemap>
-		<loc>http://www.example.com/sitemap1.xml.gz</loc>
-		<lastmod>2004-10-01T18:23:17+00:00</lastmod>
-	</sitemap>
-	<sitemap>
-		<loc>http://www.example.com/sitemap2.xml.gz</loc>
-		<lastmod>2005-01-01</lastmod>
-	</sitemap>
+<sitemap>
+   <loc>http://digital.library.wayne.edu/sitemaps/sitemap1.xml</loc>
+   <lastmod>2004-10-01T18:23:17+00:00</lastmod>
+</sitemap>
 </sitemapindex>
 '''
 
-
-def getSingleObjects():
-	doc_dict = {}
+def getSingleObjects(id_list, start):	
+	smCount = 1
+	tcount = 0	
 	si = sunburnt.SolrInterface("http://localhost:8080/solr4/fedobjs/")	
-	# with 50,000, there is an error. It's proably in one record, but how do we do this with exceptions?
-	response = si.query(id="wayne*").paginate(start=0,rows=50000).execute()
+	response = si.query(id="wayne*").query(rels_isDiscoverable="true").field_limit("id").paginate(start=start,rows=50000).execute()	
+	print "Num Results:",response.result.numFound
 	for each in response:
-		do stuff, push to doc_dict
+		# print "adding:",each['id']
+		id_list.append(each['id'])		
+		tcount+=1
+	print "Writing",tcount,"results..."
+	writeSitemapXML(id_list, smCount)
 
 
-def writeSitemapXML(doc_dict):
-	pass
+def writeSitemapXML(id_list, smCount):
+	sm = Sitemap(changefreq='weekly')
+	for object_id in id_list:
+		urladd = "http://digital.library.wayne.edu/digitalcollections/item?id={object_id}".format(object_id=object_id)
+		sm.add(
+			urladd,
+			lastmod="today"
+		)
+	filename = "/var/www/wsuls/sitemaps/sitemap{smCount}.xml".format(smCount=smCount)
+	fhand = open(filename,"w")
+	sm.write(fhand)
+	fhand.close()
+
+
+def main():
+	stime = time.time()
+	id_list = []
+	getSingleObjects(id_list,0)
+	etime = time.time()
+	print "Time Elapsed:",etime-stime
+
+
+if __name__ == "__main__":
+	#get args
+
+	main()
