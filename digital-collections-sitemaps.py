@@ -42,7 +42,7 @@ def writeSitemapXML(id_list, smCount):
 			urladd,
 			lastmod="today"
 		)
-	filename = "/var/www/wsuls/sitemaps/sitemap{smCount}.xml".format(smCount=smCount)
+	filename = "/var/www/wsuls/digitalcollections/sitemaps/sitemap{smCount}.xml".format(smCount=smCount)
 	fhand = open(filename,"w")
 	sm.write(fhand)
 	fhand.close()
