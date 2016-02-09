@@ -3,7 +3,7 @@
 
 import requests
 import lxml
-import sunburnt
+from mysolr import Solr
 from apesmit import Sitemap #library for writing sitemap XML
 import time
 import sys
@@ -23,10 +23,11 @@ import sys
 def getSingleObjects(id_list, start):	
 	smCount = 1
 	tcount = 0	
-	si = sunburnt.SolrInterface("http://localhost:8080/solr4/fedobjs/")	
-	response = si.query(id="wayne*").query(rels_isDiscoverable="true").field_limit("id").paginate(start=start,rows=50000).execute()	
-	print "Num Results:",response.result.numFound
-	for each in response:
+	solr = Solr('http://localhost:8080/solr4/fedobjs')
+	query = {'q' : 'id=wayne*', 'q' : 'rels_isDiscoverable=true', 'fl' : 'id', 'rows' : 50000, 'start' : 0}
+	response = solr.search(**query)
+	print "Num Results:",response.total_results
+	for each in response.documents:
 		# print "adding:",each['id']
 		id_list.append(each['id'])		
 		tcount+=1
