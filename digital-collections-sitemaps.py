@@ -24,7 +24,7 @@ def getSingleObjects(id_list, start):
 	smCount = 1
 	tcount = 0	
 	solr = Solr('http://localhost:8080/solr4/fedobjs')
-	query = {'q' : 'id=wayne*', 'q' : 'rels_isDiscoverable=true', 'fl' : 'id', 'rows' : 50000, 'start' : 0}
+	query = {'q' : 'rels_isDiscoverable:True', 'fl' : 'id', 'rows' : 50000, 'start' : 0}
 	response = solr.search(**query)
 	print "Num Results:",response.total_results
 	for each in response.documents:
