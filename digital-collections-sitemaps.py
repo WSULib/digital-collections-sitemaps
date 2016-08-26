@@ -38,7 +38,7 @@ def getSingleObjects(id_list, start):
 def writeSitemapXML(id_list, smCount):
 	sm = Sitemap(changefreq='weekly')
 	for object_id in id_list:
-		urladd = "http://digital.library.wayne.edu/digitalcollections/item?id={object_id}".format(object_id=object_id)
+		urladd = "http://digital.library.wayne.edu/item/{object_id}".format(object_id=object_id)
 		sm.add(
 			urladd,
 			lastmod="today"
