@@ -20,8 +20,7 @@ import sys
 </sitemapindex>
 '''
 
-def getSingleObjects(id_list, start):	
-	smCount = 1
+def getSingleObjects(id_list, start):		
 	tcount = 0	
 	solr = Solr('http://localhost:8080/solr4/fedobjs')
 	query = {'q' : 'rels_isDiscoverable:True', 'fl' : 'id', 'rows' : 50000, 'start' : 0}
@@ -32,18 +31,18 @@ def getSingleObjects(id_list, start):
 		id_list.append(each['id'])		
 		tcount+=1
 	print "Writing",tcount,"results..."
-	writeSitemapXML(id_list, smCount)
+	writeSitemapXML(id_list)
 
 
-def writeSitemapXML(id_list, smCount):
+def writeSitemapXML(id_list):
 	sm = Sitemap(changefreq='weekly')
 	for object_id in id_list:
-		urladd = "http://digital.library.wayne.edu/item/{object_id}".format(object_id=object_id)
+		urladd = "https://digital.library.wayne.edu/item/{object_id}".format(object_id=object_id)
 		sm.add(
 			urladd,
 			lastmod="today"
 		)
-	filename = "/var/www/wsuls/digitalcollections/sitemaps/sitemap{smCount}.xml".format(smCount=smCount)
+	filename = "/var/www/wsuls/digitalcollections/public/sitemaps/sitemap_https.xml"
 	fhand = open(filename,"w")
 	sm.write(fhand)
 	fhand.close()
